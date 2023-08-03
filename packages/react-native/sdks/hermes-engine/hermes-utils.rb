@@ -146,7 +146,7 @@ def build_hermes_from_source(source, git, local_hermes_dir)
         source[:git] = "file://" + local_hermes_dir
     else
         source[:git] = git
-        source[:commit] = `git ls-remote https://github.com/carlosalmonte04/hermes main | cut -f 1`.strip
+        source[:commit] = `git ls-remote https://github.com/facebook/hermes main | cut -f 1`.strip
     end
 end
 
