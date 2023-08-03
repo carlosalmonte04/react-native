@@ -30,7 +30,7 @@ end
 # - react_native_path: path to react native
 #
 # Returns: a properly configured source object
-def compute_hermes_source(build_from_source, hermestag_file, git, version, build_type, react_native_path)
+def compute_hermes_source(build_from_source, hermestag_file, git, version, react_native_path, local_hermes_dir)
     source = {}
 
     if ENV.has_key?('HERMES_ENGINE_TARBALL_PATH')
@@ -39,12 +39,15 @@ def compute_hermes_source(build_from_source, hermestag_file, git, version, build
         build_hermes_from_commit(source, git, ENV['HERMES_COMMIT'])
     elsif build_from_source
         if File.exist?(hermestag_file)
+            putsIfPodPresent("file exists!!!!")
             build_from_tagfile(source, git, hermestag_file)
         else
-            build_hermes_from_source(source, git)
+            build_hermes_from_source(source, git, local_hermes_dir)
         end
-    elsif hermes_artifact_exists(release_tarball_url(version, build_type))
-        use_release_tarball(source, version, build_type)
+    elsif hermes_artifact_exists(release_tarball_url(version, :debug))
+        use_release_tarball(source, version, :debug)
+        download_stable_hermes(react_native_path, version, :debug)
+        download_stable_hermes(react_native_path, version, :release)
     elsif hermes_artifact_exists(nightly_tarball_url(version).gsub("\\", ""))
         use_nightly_tarball(source, react_native_path, version)
     else
@@ -100,6 +103,25 @@ def putsIfPodPresent(message, level = 'warning')
     end
 end
 
+def download_stable_hermes(react_native_path, version, configuration)
+    tarball_url = release_tarball_url(version, configuration)
+    download_hermes_tarball(react_native_path, tarball_url, version, configuration)
+end
+
+def download_hermes_tarball(react_native_path, tarball_url, version, configuration)
+    destination_folder = "#{react_native_path}/sdks/downloads"
+    destination_path = configuration == nil ?
+        "#{destination_folder}/hermes-ios-#{version}.tar.gz" :
+        "#{destination_folder}/hermes-ios-#{version}-#{configuration}.tar.gz"
+
+    unless File.exist?(destination_path)
+      # Download to a temporary file first so we don't cache incomplete downloads.
+      tmp_file = "#{destination_folder}/hermes-ios.download"
+      `mkdir -p "#{destination_folder}" && curl "#{tarball_url}" -Lo "#{tmp_file}" && mv "#{tmp_file}" "#{destination_path}"`
+    end
+    return destination_path
+end
+
 # This function downloads the nightly prebuilt version of Hermes based on the passed version
 # and save it in the node_module/react_native/sdks/downloads folder
 # It then returns the path to the hermes tarball
@@ -110,16 +132,7 @@ end
 # Returns: the path to the downloaded Hermes tarball
 def download_nightly_hermes(react_native_path, version)
     tarball_url = nightly_tarball_url(version)
-
-    destination_folder = "#{react_native_path}/sdks/downloads"
-    destination_path = "#{destination_folder}/hermes-ios-#{version}.tar.gz"
-
-    unless File.exist?(destination_path)
-      # Download to a temporary file first so we don't cache incomplete downloads.
-      tmp_file = "#{destination_folder}/hermes-ios.download"
-      `mkdir -p "#{destination_folder}" && curl "#{tarball_url}" -Lo "#{tmp_file}" && mv "#{tmp_file}" "#{destination_path}"`
-    end
-    return destination_path
+    return download_hermes_tarball(react_native_path, tarball_url, version, nil)
 end
 
 def nightly_tarball_url(version)
@@ -127,10 +140,14 @@ def nightly_tarball_url(version)
     return "http://oss.sonatype.org/service/local/artifact/maven/redirect\?#{params}"
 end
 
-def build_hermes_from_source(source, git)
+def build_hermes_from_source(source, git, local_hermes_dir)
     putsIfPodPresent('[Hermes] Installing hermes-engine may take slightly longer, building Hermes compiler from source...')
-    source[:git] = git
-    source[:commit] = `git ls-remote https://github.com/facebook/hermes main | cut -f 1`.strip
+    if local_hermes_dir
+        source[:git] = "file://" + local_hermes_dir
+    else
+        source[:git] = git
+        source[:commit] = `git ls-remote https://github.com/carlosalmonte04/hermes main | cut -f 1`.strip
+    end
 end
 
 def build_hermes_from_commit(source, git, commit)
