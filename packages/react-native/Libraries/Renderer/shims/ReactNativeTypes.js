@@ -6,9 +6,8 @@
  *
  * @noformat
  * @flow strict
- * @generated SignedSource<<7dc3ed81183377055bac08760fcd775b>>
- *
- * This file was sync'd from the facebook/react repository.
+ * @nolint
+ * @generated SignedSource<<652b117c94307244bcf5e4af18928903>>
  */
 
 import type {ElementRef, ElementType, Element, AbstractComponent} from 'react';
@@ -216,8 +215,9 @@ export type ReactNativeType = {
 };
 
 export opaque type Node = mixed;
-type InternalInstanceHandle = mixed;
+export opaque type InternalInstanceHandle = mixed;
 type PublicInstance = mixed;
+type PublicTextInstance = mixed;
 
 export type ReactFabricType = {
   findHostInstance_DEPRECATED<TElementType: ElementType>(
@@ -247,7 +247,7 @@ export type ReactFabricType = {
   ): ?Node,
   getPublicInstanceFromInternalInstanceHandle(
     internalInstanceHandle: InternalInstanceHandle,
-  ): PublicInstance,
+  ): PublicInstance | PublicTextInstance,
   ...
 };
 

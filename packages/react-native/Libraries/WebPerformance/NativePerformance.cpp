@@ -28,9 +28,8 @@ NativePerformance::NativePerformance(std::shared_ptr<CallInvoker> jsInvoker)
 void NativePerformance::mark(
     jsi::Runtime &rt,
     std::string name,
-    double startTime,
-    double duration) {
-  PerformanceEntryReporter::getInstance().mark(name, startTime, duration);
+    double startTime) {
+  PerformanceEntryReporter::getInstance().mark(name, startTime);
 }
 
 void NativePerformance::measure(
@@ -61,12 +60,12 @@ ReactNativeStartupTiming NativePerformance::getReactNativeStartupTiming(
 
   ReactMarker::StartupLogger &startupLogger =
       ReactMarker::StartupLogger::getInstance();
-  result.startTime = startupLogger.getAppStartTime();
+  result.startTime = startupLogger.getAppStartupStartTime();
   result.executeJavaScriptBundleEntryPointStart =
       startupLogger.getRunJSBundleStartTime();
   result.executeJavaScriptBundleEntryPointEnd =
       startupLogger.getRunJSBundleEndTime();
-  result.endTime = startupLogger.getRunJSBundleEndTime();
+  result.endTime = startupLogger.getAppStartupEndTime();
 
   return result;
 }

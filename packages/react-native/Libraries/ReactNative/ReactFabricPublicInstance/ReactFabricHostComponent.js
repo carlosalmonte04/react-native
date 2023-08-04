@@ -9,9 +9,9 @@
  */
 
 import type {
-  AttributeConfiguration,
   HostComponent,
   INativeMethods,
+  InternalInstanceHandle,
   MeasureInWindowOnSuccessCallback,
   MeasureLayoutOnSuccessCallback,
   MeasureOnSuccessCallback,
@@ -23,6 +23,7 @@ import TextInputState from '../../Components/TextInput/TextInputState';
 import {getNodeFromInternalInstanceHandle} from '../../Renderer/shims/ReactFabric';
 import {getFabricUIManager} from '../FabricUIManager';
 import {create} from './ReactNativeAttributePayload';
+import warnForStyleProps from './warnForStyleProps';
 import nullthrows from 'nullthrows';
 
 const {
@@ -41,14 +42,14 @@ const noop = () => {};
 export default class ReactFabricHostComponent implements INativeMethods {
   // These need to be accessible from `ReactFabricPublicInstanceUtils`.
   __nativeTag: number;
-  __internalInstanceHandle: mixed;
+  __internalInstanceHandle: InternalInstanceHandle;
 
   _viewConfig: ViewConfig;
 
   constructor(
     tag: number,
     viewConfig: ViewConfig,
-    internalInstanceHandle: mixed,
+    internalInstanceHandle: InternalInstanceHandle,
   ) {
     this.__nativeTag = tag;
     this._viewConfig = viewConfig;
@@ -145,27 +146,6 @@ export default class ReactFabricHostComponent implements INativeMethods {
     );
     if (node != null && updatePayload != null) {
       setNativeProps(node, updatePayload);
-    }
-  }
-}
-
-function warnForStyleProps(
-  props: {...},
-  validAttributes: AttributeConfiguration,
-): void {
-  if (__DEV__) {
-    for (const key in validAttributes.style) {
-      if (!(validAttributes[key] || props[key] === undefined)) {
-        console.error(
-          'You are setting the style `{ %s' +
-            ': ... }` as a prop. You ' +
-            'should nest it in a style object. ' +
-            'E.g. `{ style: { %s' +
-            ': ... } }`',
-          key,
-          key,
-        );
-      }
     }
   }
 }
