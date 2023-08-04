@@ -15,12 +15,13 @@ version = package['version']
 # sdks/.hermesversion
 hermestag_file = File.join(react_native_path, "sdks", ".hermesversion")
 build_from_source = ENV['BUILD_FROM_SOURCE'] === 'true'
+local_hermes_dir = ENV['REACT_NATIVE_OVERRIDE_HERMES_DIR']
 
 git = "https://github.com/facebook/hermes.git"
 
 abort_if_invalid_tarball_provided!
 
-source = compute_hermes_source(build_from_source, hermestag_file, git, version, react_native_path)
+source = compute_hermes_source(build_from_source, hermestag_file, git, version, react_native_path, local_hermes_dir)
 
 Pod::Spec.new do |spec|
   spec.name        = "hermes-engine"
