@@ -50,7 +50,7 @@ def compute_hermes_source(build_from_source, hermestag_file, git, version, react
     elsif hermes_artifact_exists(nightly_tarball_url(version).gsub("\\", ""))
         use_nightly_tarball(source, react_native_path, version)
     else
-        build_hermes_from_source(source, git)
+        build_hermes_from_source(source, git, local_hermes_dir)
     end
 
     return source
