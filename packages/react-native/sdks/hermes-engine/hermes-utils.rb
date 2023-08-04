@@ -30,7 +30,7 @@ end
 # - react_native_path: path to react native
 #
 # Returns: a properly configured source object
-def compute_hermes_source(build_from_source, hermestag_file, git, version, react_native_path)
+def compute_hermes_source(build_from_source, hermestag_file, git, version, react_native_path, local_hermes_dir)
     source = {}
 
     if ENV.has_key?('HERMES_ENGINE_TARBALL_PATH')
@@ -41,7 +41,7 @@ def compute_hermes_source(build_from_source, hermestag_file, git, version, react
         if File.exist?(hermestag_file)
             build_from_tagfile(source, git, hermestag_file)
         else
-            build_hermes_from_source(source, git)
+            build_hermes_from_source(source, git, local_hermes_dir)
         end
     elsif hermes_artifact_exists(release_tarball_url(version, :debug))
         use_release_tarball(source, version, :debug)
@@ -50,7 +50,7 @@ def compute_hermes_source(build_from_source, hermestag_file, git, version, react
     elsif hermes_artifact_exists(nightly_tarball_url(version).gsub("\\", ""))
         use_nightly_tarball(source, react_native_path, version)
     else
-        build_hermes_from_source(source, git)
+        build_hermes_from_source(source, git, local_hermes_dir)
     end
 
     return source
@@ -139,10 +139,15 @@ def nightly_tarball_url(version)
     return "http://oss.sonatype.org/service/local/artifact/maven/redirect\?#{params}"
 end
 
-def build_hermes_from_source(source, git)
+def build_hermes_from_source(source, git, local_hermes_dir)
     putsIfPodPresent('[Hermes] Installing hermes-engine may take slightly longer, building Hermes compiler from source...')
-    source[:git] = git
-    source[:commit] = `git ls-remote https://github.com/facebook/hermes main | cut -f 1`.strip
+    if local_hermes_dir
+        source[:git] = "file://" + local_hermes_dir
+        source[:commit] = `cd #{local_hermes_dir} && git log --pretty --name-only | grep "commit" -m 1 | awk '{print $2}'`.strip
+    else
+        source[:git] = git
+        source[:commit] = `git ls-remote https://github.com/facebook/hermes main | cut -f 1`.strip
+    end
 end
 
 def build_hermes_from_commit(source, git, commit)
