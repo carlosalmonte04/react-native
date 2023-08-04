@@ -39,7 +39,6 @@ def compute_hermes_source(build_from_source, hermestag_file, git, version, react
         build_hermes_from_commit(source, git, ENV['HERMES_COMMIT'])
     elsif build_from_source
         if File.exist?(hermestag_file)
-            putsIfPodPresent("file exists!!!!")
             build_from_tagfile(source, git, hermestag_file)
         else
             build_hermes_from_source(source, git, local_hermes_dir)
@@ -144,6 +143,7 @@ def build_hermes_from_source(source, git, local_hermes_dir)
     putsIfPodPresent('[Hermes] Installing hermes-engine may take slightly longer, building Hermes compiler from source...')
     if local_hermes_dir
         source[:git] = "file://" + local_hermes_dir
+        source[:commit] = `cd #{local_hermes_dir} && git log --pretty --name-only | grep "commit" -m 1 | awk '{print $2}'`.strip
     else
         source[:git] = git
         source[:commit] = `git ls-remote https://github.com/facebook/hermes main | cut -f 1`.strip
