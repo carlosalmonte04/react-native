@@ -1,11 +1,11 @@
 {
-  "name": "react-native",
-  "version": "1000.0.0",
+  "name": "@carlosalmonte04/react-native",
+  "version": "0.0.1",
   "description": "A framework for building native apps using React",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/facebook/react-native.git",
+    "url": "git+https://github.com/carlosalmonte04/react-native.git",
     "directory": "packages/react-native"
   },
   "homepage": "https://reactnative.dev/",
@@ -19,7 +19,7 @@
     "app-framework",
     "mobile-development"
   ],
-  "bugs": "https://github.com/facebook/react-native/issues",
+  "bugs": "https://github.com/carlosalmonte04/react-native/issues",
   "engines": {
     "node": ">= 22.14.0"
   },
